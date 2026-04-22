@@ -52,4 +52,4 @@ If I had more time, I would:
 4. **Stripe Webhooks**: Implement actual payment processing for real-world deployments.
 
 ---
-Built with ❤️ by Antigravity
+Built with ❤️ by kalyani
