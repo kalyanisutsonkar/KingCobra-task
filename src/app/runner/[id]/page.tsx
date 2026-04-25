@@ -145,7 +145,7 @@ export default function WorkflowRunnerPage() {
                 <div className="flex gap-4">
                   <button 
                     onClick={() => handleRun(false)}
-                    disabled={status === "running"}
+                    disabled={false}
                     className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25"
                   >
                     <Sparkles className="w-5 h-5" />
@@ -153,7 +153,7 @@ export default function WorkflowRunnerPage() {
                   </button>
                   <button 
                     onClick={() => handleRun(true)}
-                    disabled={status === "running"}
+                    disabled={false}
                     className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25"
                   >
                     <Zap className="w-5 h-5" />
