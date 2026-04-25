@@ -1,10 +1,47 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { WORKFLOWS } from "@/lib/data";
 import OpenAI from "openai";
 
 export async function POST(req: Request) {
   try {
     const { workflowId, topic, audience, mock } = await req.json();
+
+    // Ensure workflow exists in DB (Auto-seed if needed)
+    let workflow = await prisma.workflow.findUnique({ where: { id: workflowId } });
+    
+    if (!workflow) {
+      console.log("Workflow not found in DB, attempting auto-seed...");
+      for (const w of WORKFLOWS) {
+        await prisma.workflow.upsert({
+          where: { id: w.id },
+          update: {},
+          create: {
+            id: w.id,
+            title: w.title,
+            description: w.description,
+            longDescription: w.longDescription,
+            category: w.category,
+            price: w.price,
+            rating: w.rating,
+            reviews: w.reviews,
+            mediaUrl: w.mediaUrl,
+            steps: {
+              create: w.steps.map((step) => ({
+                title: step.title,
+                description: step.description,
+                icon: step.icon,
+              })),
+            },
+          },
+        });
+      }
+      workflow = await prisma.workflow.findUnique({ where: { id: workflowId } });
+    }
+
+    if (!workflow) {
+      return NextResponse.json({ error: "Workflow not found even after seeding." }, { status: 404 });
+    }
 
     if (mock) {
       // Simulate delay for mock execution
