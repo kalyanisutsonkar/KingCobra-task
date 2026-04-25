@@ -1,18 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Filter, SlidersHorizontal } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Filter, SlidersHorizontal, Loader2 } from "lucide-react";
 import { WorkflowCard } from "./WorkflowCard";
 
-import { WORKFLOWS } from "@/lib/data";
+import { Workflow } from "@/lib/data";
 
 const CATEGORIES = ["All", "Marketing", "Sales", "HR", "Content"];
 
 export function Marketplace() {
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredWorkflows = WORKFLOWS.filter(w => {
+  useEffect(() => {
+    fetch("/api/workflows")
+      .then((res) => res.json())
+      .then((data) => {
+        setWorkflows(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch workflows", err);
+        setLoading(false);
+      });
+  }, []);
+
+  const filteredWorkflows = workflows.filter(w => {
     const matchesCategory = activeCategory === "All" || w.category === activeCategory;
     const matchesSearch = w.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          w.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -55,9 +70,15 @@ export function Marketplace() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {filteredWorkflows.map((workflow, idx) => (
-          <WorkflowCard key={idx} {...workflow} />
-        ))}
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-80 bg-white/5 border border-white/10 rounded-3xl animate-pulse" />
+          ))
+        ) : (
+          filteredWorkflows.map((workflow, idx) => (
+            <WorkflowCard key={idx} {...workflow} />
+          ))
+        )}
       </div>
 
       {filteredWorkflows.length === 0 && (

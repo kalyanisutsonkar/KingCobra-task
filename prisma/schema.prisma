@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Workflow {
+  id              String      @id
+  title           String
+  description     String
+  longDescription String
+  category        String
+  price           String
+  rating          Float
+  reviews         Int
+  mediaUrl        String?
+  steps           Step[]
+  executions      Execution[]
+}
+
+model Step {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String
+  workflowId  String
+  workflow    Workflow @relation(fields: [workflowId], references: [id])
+}
+
+model Execution {
+  id         String   @id @default(uuid())
+  workflowId String
+  workflow   Workflow @relation(fields: [workflowId], references: [id])
+  topic      String
+  audience   String
+  result     String
+  createdAt  DateTime @default(now())
+}
