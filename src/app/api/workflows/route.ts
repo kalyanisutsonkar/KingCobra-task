@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { WORKFLOWS } from "@/lib/data";
 
 export async function GET() {
   try {
@@ -8,9 +9,16 @@ export async function GET() {
         steps: true,
       },
     });
+
+    // Fallback to static data if DB is empty (common on Vercel with SQLite)
+    if (workflows.length === 0) {
+      return NextResponse.json(WORKFLOWS);
+    }
+
     return NextResponse.json(workflows);
   } catch (error) {
     console.error("Error fetching workflows:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    // Fallback to static data if DB connection fails
+    return NextResponse.json(WORKFLOWS);
   }
 }
