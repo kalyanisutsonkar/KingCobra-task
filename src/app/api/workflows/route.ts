@@ -4,15 +4,44 @@ import { WORKFLOWS } from "@/lib/data";
 
 export async function GET() {
   try {
-    const workflows = await prisma.workflow.findMany({
+    let workflows = await prisma.workflow.findMany({
       include: {
         steps: true,
       },
     });
 
-    // Fallback to static data if DB is empty (common on Vercel with SQLite)
+    // Auto-seed if database is empty
     if (workflows.length === 0) {
-      return NextResponse.json(WORKFLOWS);
+      console.log("Database empty, auto-seeding...");
+      for (const workflow of WORKFLOWS) {
+        await prisma.workflow.upsert({
+          where: { id: workflow.id },
+          update: {},
+          create: {
+            id: workflow.id,
+            title: workflow.title,
+            description: workflow.description,
+            longDescription: workflow.longDescription,
+            category: workflow.category,
+            price: workflow.price,
+            rating: workflow.rating,
+            reviews: workflow.reviews,
+            mediaUrl: workflow.mediaUrl,
+            steps: {
+              create: workflow.steps.map((step) => ({
+                title: step.title,
+                description: step.description,
+                icon: step.icon,
+              })),
+            },
+          },
+        });
+      }
+      
+      // Fetch again after seeding
+      workflows = await prisma.workflow.findMany({
+        include: { steps: true },
+      });
     }
 
     return NextResponse.json(workflows);
