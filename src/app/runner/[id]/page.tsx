@@ -29,11 +29,18 @@ export default function WorkflowRunnerPage() {
     fetch("/api/workflows")
       .then(res => res.json())
       .then(data => {
-        const found = data.find((w: any) => w.id === params.id);
-        setWorkflow(found);
+        if (Array.isArray(data)) {
+          const found = data.find((w: any) => w.id === params.id);
+          setWorkflow(found);
+        } else {
+          console.error("API did not return an array:", data);
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Fetch error:", err);
+        setLoading(false);
+      });
   }, [params.id]);
 
   if (loading) return <div className="min-h-screen bg-[#030712] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>;

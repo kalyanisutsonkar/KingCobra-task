@@ -18,11 +18,17 @@ export function Marketplace() {
     fetch("/api/workflows")
       .then((res) => res.json())
       .then((data) => {
-        setWorkflows(data);
+        if (Array.isArray(data)) {
+          setWorkflows(data);
+        } else {
+          console.error("API did not return an array:", data);
+          setWorkflows([]);
+        }
         setLoading(false);
       })
       .catch((err) => {
         console.error("Failed to fetch workflows", err);
+        setWorkflows([]);
         setLoading(false);
       });
   }, []);
